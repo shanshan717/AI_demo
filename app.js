@@ -58,11 +58,21 @@ const USERS_KEY = "daily_flow_users";
 const SESSION_KEY = "daily_flow_session";
 
 async function hashPassword(password) {
-  const enc = new TextEncoder();
-  const buf = await crypto.subtle.digest("SHA-256", enc.encode(password));
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  if (globalThis.crypto?.subtle) {
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest("SHA-256", enc.encode(password));
+    return Array.from(new Uint8Array(buf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  // Fallback for environments where SubtleCrypto is unavailable, such as some file:// contexts.
+  let hash = 2166136261;
+  for (const ch of password) {
+    hash ^= ch.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `fallback_${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
 function getUsers() {
@@ -132,7 +142,7 @@ function bindAuthEvents() {
     if (e.key === "Enter") handleAuthSubmit(currentAuthMode);
   });
 
-  // logout is handled via global doLogout() called from onclick
+  logoutBtn.addEventListener("click", doLogout);
 }
 
 function doLogout() {
@@ -161,7 +171,14 @@ async function handleAuthSubmit(mode) {
   if (password.length < 8) { errorEl.textContent = "密码至少需要 8 位"; return; }
 
   const users = getUsers();
-  const hashed = await hashPassword(password);
+  let hashed = "";
+  try {
+    hashed = await hashPassword(password);
+  } catch (error) {
+    console.error("Auth hashing failed:", error);
+    errorEl.textContent = "当前环境无法完成登录，请改用 localhost 打开，或刷新后重试";
+    return;
+  }
 
   if (mode === "register") {
     if (users[username]) { errorEl.textContent = "用户名已存在，请换一个或直接登录"; return; }
@@ -176,6 +193,8 @@ async function handleAuthSubmit(mode) {
     startApp(username);
   }
 }
+
+window.doLogout = doLogout;
 
 function bindEvents() {
   sideMenu.addEventListener("click", (e) => {
