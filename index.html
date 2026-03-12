@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101827" />
+    <title>Daily Flow - 打卡与记账</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-bg"></div>
+    <div class="shell">
+      <aside class="sidebar">
+        <div>
+          <div class="brand">Daily Flow.</div>
+          <div class="profile-card">
+            <div class="avatar">SS</div>
+            <p class="name">ShanShan</p>
+            <p class="hint">个人打卡空间</p>
+          </div>
+          <nav class="menu" id="sideMenu">
+            <a class="active" href="#" data-view="dashboard">仪表盘</a>
+            <a href="#" data-view="todo">每日 Todo</a>
+            <a href="#" data-view="expense">智能记账</a>
+            <a href="#" data-view="summary">统计分析</a>
+          </nav>
+        </div>
+        <div class="side-note">一句话记账，自动分类。越轻量，越容易坚持。</div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar panel">
+          <div>
+            <p class="tiny">Good day</p>
+            <h1>今日打卡与消费概览</h1>
+          </div>
+          <input class="top-search" type="text" value="专注于长期可坚持的记录习惯" readonly />
+        </header>
+
+        <section class="overview-grid" id="overviewGrid">
+          <article class="panel stat-card stat-a">
+            <p class="tiny">今日 Todo</p>
+            <p id="metricTodoCount" class="stat-num">0 项</p>
+            <p class="hint">完成你最重要的 1-3 件事</p>
+          </article>
+          <article class="panel stat-card stat-b">
+            <p class="tiny">今日完成率</p>
+            <p id="metricTodoRate" class="stat-num">0%</p>
+            <p class="hint">减少计划，提升达成感</p>
+          </article>
+          <article class="panel stat-card stat-c">
+            <p class="tiny">近 7 天支出</p>
+            <p id="metricWeekSpend" class="stat-num">¥0.00</p>
+            <p class="hint">观察近期消费波动</p>
+          </article>
+          <article class="panel stat-card stat-d">
+            <p class="tiny">本月支出</p>
+            <p id="metricMonthSpend" class="stat-num">¥0.00</p>
+            <p class="hint">给自己一个月度预算</p>
+          </article>
+        </section>
+
+        <section class="content-grid" id="contentGrid">
+          <article id="todoSection" class="panel card-block">
+            <div class="block-head">
+              <h2>每日 Todo</h2>
+            </div>
+            <div class="row">
+              <label for="todoDate">日期</label>
+              <input id="todoDate" type="date" />
+            </div>
+            <div class="row">
+              <input id="todoInput" type="text" placeholder="例如：阅读30分钟" />
+              <button id="addTodoBtn">添加</button>
+            </div>
+            <ul id="todoList" class="list"></ul>
+          </article>
+
+          <article id="expenseSection" class="panel card-block">
+            <div class="block-head">
+              <h2>智能记账</h2>
+            </div>
+            <textarea
+              id="expenseText"
+              rows="6"
+              placeholder="例如：买衣服花了100元，吃饭花了10元，打车25元"
+            ></textarea>
+            <div class="row end">
+              <button id="parseSaveBtn">解析并保存</button>
+            </div>
+            <div id="parsePreview" class="hint"></div>
+          </article>
+
+          <article id="summarySection" class="panel card-block">
+            <div class="row between center">
+              <h2>统计总结</h2>
+              <div class="tabs" id="periodTabs">
+                <button data-period="week" class="active">周</button>
+                <button data-period="month">月</button>
+                <button data-period="year">年</button>
+              </div>
+            </div>
+            <div id="summary" class="summary"></div>
+          </article>
+
+          <article id="recentSection" class="panel card-block">
+            <div class="block-head">
+              <h2>最近记账</h2>
+            </div>
+            <ul id="expenseList" class="list"></ul>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js");
+        });
+      }
+    </script>
+  </body>
+</html>

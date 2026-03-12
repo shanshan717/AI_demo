@@ -1,0 +1,9 @@
+{
+  "name": "Daily Flow 打卡记账",
+  "short_name": "DailyFlow",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#111827",
+  "icons": []
+}
