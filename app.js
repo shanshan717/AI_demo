@@ -132,17 +132,19 @@ function bindAuthEvents() {
     if (e.key === "Enter") handleAuthSubmit(currentAuthMode);
   });
 
-  logoutBtn.addEventListener("click", () => {
-    clearCurrentUser();
-    data.todos = [];
-    data.expenses = [];
-    storageKey = "";
-    document.getElementById("profileName").textContent = "—";
-    document.getElementById("authOverlay").classList.remove("is-hidden");
-    document.getElementById("authUsername").value = "";
-    document.getElementById("authPassword").value = "";
-    document.getElementById("authError").textContent = "";
-  });
+  // logout is handled via global doLogout() called from onclick
+}
+
+function doLogout() {
+  clearCurrentUser();
+  data.todos = [];
+  data.expenses = [];
+  storageKey = "";
+  document.getElementById("profileName").textContent = "—";
+  document.getElementById("authOverlay").classList.remove("is-hidden");
+  document.getElementById("authUsername").value = "";
+  document.getElementById("authPassword").value = "";
+  document.getElementById("authError").textContent = "";
 }
 
 async function handleAuthSubmit(mode) {
