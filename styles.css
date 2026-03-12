@@ -398,6 +398,131 @@ button:hover {
   display: none !important;
 }
 
+/* ---- Auth Overlay ---- */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 20% 15%, #f6f3ef, transparent 45%),
+    radial-gradient(circle at 80% 5%, #d9e2f6, transparent 40%),
+    linear-gradient(160deg, #ece7df 0%, #dbdee6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.auth-card {
+  background: #fbfbfb;
+  border-radius: 20px;
+  padding: 36px 40px;
+  width: min(420px, 90vw);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  box-shadow: 0 20px 60px rgba(17, 24, 39, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-brand {
+  font-weight: 760;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  color: var(--dark);
+  margin: 0;
+}
+
+.auth-sub {
+  font-size: 0.82rem;
+  color: var(--sub);
+  margin: 0;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--line);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.auth-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 7px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--sub);
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.auth-tab.active {
+  background: #fff;
+  color: var(--dark);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.auth-card input[type="text"],
+.auth-card input[type="password"] {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  background: var(--panel);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.auth-card input[type="text"]:focus,
+.auth-card input[type="password"]:focus {
+  border-color: #6b7280;
+}
+
+.auth-error {
+  font-size: 0.82rem;
+  color: #dc2626;
+  min-height: 1em;
+  margin: 0;
+}
+
+#authSubmitBtn {
+  width: 100%;
+  padding: 11px;
+  background: var(--dark);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+#authSubmitBtn:hover {
+  opacity: 0.85;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--sub);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.logout-btn:hover {
+  background: var(--line);
+}
+
 .content-grid.single-view {
   grid-template-columns: 1fr;
 }

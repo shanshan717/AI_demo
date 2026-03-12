@@ -1,4 +1,4 @@
-const storageKey = "daily_flow_data_v1";
+let storageKey = "";
 
 const categoryRules = [
   { category: "餐饮", keywords: ["吃", "饭", "餐", "奶茶", "咖啡", "外卖", "早餐", "午餐", "晚餐"] },
@@ -10,8 +10,9 @@ const categoryRules = [
   { category: "医疗", keywords: ["药", "医院", "挂号", "体检", "看病"] }
 ];
 
-const data = loadData();
+let data = { todos: [], expenses: [] };
 let activePeriod = "week";
+let appEventsBound = false;
 
 const sideMenu = document.getElementById("sideMenu");
 const menuLinks = [...document.querySelectorAll("#sideMenu a[data-view]")];
@@ -43,10 +44,135 @@ const metricMonthSpend = document.getElementById("metricMonthSpend");
 init();
 
 function init() {
+  bindAuthEvents();
+  const user = getCurrentUser();
+  if (user) {
+    startApp(user);
+  } else {
+    document.getElementById("authOverlay").classList.remove("is-hidden");
+  }
+}
+
+// ---- Auth ----
+const USERS_KEY = "daily_flow_users";
+const SESSION_KEY = "daily_flow_session";
+
+async function hashPassword(password) {
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest("SHA-256", enc.encode(password));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem(USERS_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function getCurrentUser() {
+  return localStorage.getItem(SESSION_KEY);
+}
+
+function setCurrentUser(username) {
+  localStorage.setItem(SESSION_KEY, username);
+}
+
+function clearCurrentUser() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+function getUserDataKey(username) {
+  return `daily_flow_data_v1_${username}`;
+}
+
+function startApp(username) {
+  storageKey = getUserDataKey(username);
+  const loaded = loadData();
+  data.todos = loaded.todos;
+  data.expenses = loaded.expenses;
+  document.getElementById("profileName").textContent = username;
+  document.getElementById("authOverlay").classList.add("is-hidden");
+
   todoDate.value = toDateInput(new Date());
-  bindEvents();
+  if (!appEventsBound) {
+    bindEvents();
+    appEventsBound = true;
+  }
   setView("dashboard");
   renderAll();
+}
+
+function bindAuthEvents() {
+  const authTabs = document.getElementById("authTabs");
+  const authSubmitBtn = document.getElementById("authSubmitBtn");
+  const authPassword = document.getElementById("authPassword");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  let currentAuthMode = "login";
+
+  authTabs.addEventListener("click", (e) => {
+    const tab = e.target.closest("button[data-tab]");
+    if (!tab) return;
+    currentAuthMode = tab.dataset.tab;
+    [...authTabs.querySelectorAll("button")].forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.tab === currentAuthMode);
+    });
+    authSubmitBtn.textContent = currentAuthMode === "login" ? "登录" : "注册";
+    document.getElementById("authError").textContent = "";
+  });
+
+  authSubmitBtn.addEventListener("click", () => handleAuthSubmit(currentAuthMode));
+
+  authPassword.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleAuthSubmit(currentAuthMode);
+  });
+
+  logoutBtn.addEventListener("click", () => {
+    clearCurrentUser();
+    data.todos = [];
+    data.expenses = [];
+    storageKey = "";
+    document.getElementById("profileName").textContent = "—";
+    document.getElementById("authOverlay").classList.remove("is-hidden");
+    document.getElementById("authUsername").value = "";
+    document.getElementById("authPassword").value = "";
+    document.getElementById("authError").textContent = "";
+  });
+}
+
+async function handleAuthSubmit(mode) {
+  const username = document.getElementById("authUsername").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const errorEl = document.getElementById("authError");
+  errorEl.textContent = "";
+
+  if (!username) { errorEl.textContent = "请输入用户名"; return; }
+  if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]{1,32}$/.test(username)) {
+    errorEl.textContent = "用户名只能包含字母、数字、下划线或中文（最多 32 位）";
+    return;
+  }
+  if (password.length < 8) { errorEl.textContent = "密码至少需要 8 位"; return; }
+
+  const users = getUsers();
+  const hashed = await hashPassword(password);
+
+  if (mode === "register") {
+    if (users[username]) { errorEl.textContent = "用户名已存在，请换一个或直接登录"; return; }
+    users[username] = hashed;
+    saveUsers(users);
+    setCurrentUser(username);
+    startApp(username);
+  } else {
+    if (!users[username]) { errorEl.textContent = "用户名不存在，请先注册"; return; }
+    if (users[username] !== hashed) { errorEl.textContent = "密码错误"; return; }
+    setCurrentUser(username);
+    startApp(username);
+  }
 }
 
 function bindEvents() {
